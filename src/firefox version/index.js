@@ -26,7 +26,7 @@ var menuItem = contextMenu.Item({
     onMessage: function(href) {
         tabs.open({
             url: data.url(pageURI),
-            onReady: function(tab) {
+            onLoad: function(tab) {
                 tab.attach({
                     contentScript: "document.getElementById('navbar').value='" +
                         href + "'; document.getElementById('go').click()",

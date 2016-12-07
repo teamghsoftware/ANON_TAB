@@ -1,7 +1,7 @@
 {
   "title": "AnonTab",
   "name": "ananontab",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "description": "let AnonTab = `${NoScript + HTTPSEverywhere + PrivateBrowsing + proxy}`;",
   "main": "./index.js",
   "author": "@0xSobky",
