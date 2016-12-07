@@ -20,7 +20,7 @@ var button = buttons.ActionButton({
 var menuItem = contextMenu.Item({
     label: 'Open Link in AnonTab',
     context: contextMenu.SelectorContext('a'),
-    contentScript: "self.on('click', function(node) {" +
+    contentScript: 'self.on("click", function(node) {' +
                    'self.postMessage(node.href);' +
                    '});',
     onMessage: function(href) {
