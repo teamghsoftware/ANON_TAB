@@ -22,14 +22,14 @@ var menuItem = contextMenu.Item({
     context: contextMenu.SelectorContext('a'),
     contentScript: "self.on('click', function(node) {" +
                    'self.postMessage(node.href);' +
-                   '})',
+                   '});',
     onMessage: function(href) {
         tabs.open({
             url: data.url(pageURI),
             onLoad: function(tab) {
                 tab.attach({
-                    contentScript: "document.getElementById('navbar').value='" +
-                        href + "'; document.getElementById('go').click()",
+                    contentScript: 'document.getElementById("navbar").value="' +
+                        encodeURI(href) + '"; document.getElementById("go").click();',
                 });
             },
         });
