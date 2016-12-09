@@ -26,13 +26,13 @@ ___Built on top of [DOMPurify](https://github.com/cure53/DOMPurify).___
 <a href="https://raw.githubusercontent.com/0xsobky/AnonTab/master/screenshots/ipleaks.png" target="blank"><img width=50% src="https://raw.githubusercontent.com/0xsobky/AnonTab/master/screenshots/ipl_thumb.png" alt="Leakproof against IPLeaks"></img></a>
 
 ## Is it secure?
-**Yes**, unless you can bypass both of DOMPurify and the restricted content security policy in place (plus a few more little restrictions).
-
-## What do people say about it?
-Go check [the reviews](https://addons.mozilla.org/en-US/firefox/addon/anontab/reviews/).
+Likely yes, unless you can bypass both of DOMPurify and the restricted content security policy in place (plus a few more little restrictions).
 
 ## Notes:
 * Users of the µBlock browser extension (or uBlock Origin) should consider adding `ananontab.resource-scheme` to their whitelist.
+
+## What do people say about it?
+Go check [the reviews](https://addons.mozilla.org/en-US/firefox/addon/anontab/reviews/).
 
 ## Credits:
 * [@0xSobky](https://twitter.com/0xSobky)
