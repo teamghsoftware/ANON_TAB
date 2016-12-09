@@ -29,7 +29,7 @@ ___Built on top of [DOMPurify](https://github.com/cure53/DOMPurify).___
 Likely yes. Unless you can bypass both of [_DOMPurify_](https://github.com/cure53/DOMPurify) and the restricted content security policy in place (plus a few more little restrictions).
 
 ## Notes:
-* Users of the µBlock browser extension (or uBlock Origin) should consider adding `ananontab.resource-scheme` to their whitelist.
+* Users of the µBlock browser extension (or uBlock Origin) are advised to add `ananontab.resource-scheme` to their whitelist.
 
 ## What do people say about it?
 Go check [the reviews](https://addons.mozilla.org/en-US/firefox/addon/anontab/reviews/).
