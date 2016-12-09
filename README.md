@@ -31,5 +31,8 @@ ___Built on top of [DOMPurify](https://github.com/cure53/DOMPurify).___
 ## What do people say about it?
 Go check [the reviews](https://addons.mozilla.org/en-US/firefox/addon/anontab/reviews/).
 
+## Notes:
+* Users of the µBlock browser extension (or uBlock Origin) should consider adding `ananontab.resource-scheme` to their whitelist.
+
 ## Credits:
 * [@0xSobky](https://twitter.com/0xSobky)
