@@ -1,8 +1,13 @@
-var proxy = 'https://feedback.googleusercontent.com/gadgets/proxy?container=fbk&url=';
+var proxy;
 var viewer = document.getElementById('viewer');
 var navbar = document.getElementById('navbar');
 var hsts_list = ['*.wikipedia.org', '*.twitter.com', '*.github.com',
                      '*.facebook.com', '*.torproject.org'];
+chrome.storage.local.get({
+    proxy: 'https://feedback.googleusercontent.com/gadgets/proxy?container=fbk&url='
+}, function(items) {
+    proxy = items.proxy;
+});
 
 /**
  * Enforce HSTS for all predefined compatible domains.

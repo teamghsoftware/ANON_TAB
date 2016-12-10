@@ -1,0 +1,30 @@
+{
+  "manifest_version": 2,
+  "name": "AnonTab",
+  "version": "1.6",
+  "author": "@0xSobky",
+  "incognito": "split",
+  "options_page": "options.html",
+  "minimum_chrome_version": "25",
+  "description": "let AnonTab = `${NoScript + HTTPSEverywhere + PrivateBrowsing + proxy}`;",
+  "content_security_policy": "default-src 'self'; object-src 'none'; style-src 'unsafe-inline'; connect-src 'self' https:; img-src 'self' data: https:; font-src 'self' data: https:;",
+  "background": {
+    "scripts": ["./index.js"]
+  },
+  "browser_action": {
+    "default_icon": "./data/images/icon_32.png"
+  },
+  "options_ui": {
+      "page": "options.html",
+      "open_in_tab": true
+  },
+  "permissions": [
+     "contextMenus",
+     "storage"
+  ],
+  "icons": {
+    "16": "./data/images/icon_16.png",
+    "32": "./data/images/icon_32.png",
+    "64": "./data/images/icon_64.png"
+  }
+}

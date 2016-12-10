@@ -17,7 +17,7 @@ function openTab(linkUrl, flag) {
             chrome.tabs.onUpdated.removeListener(listener);
             chrome.tabs.sendMessage(tabId, {linkUrl: linkUrl, type: null});
         }
-    }, null);
+    });
 }
 
 chrome.browserAction.onClicked.addListener(function(activeTab) {
