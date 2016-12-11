@@ -1,6 +1,5 @@
 /**
  * Save options to `chrome.storage`.
- *
  * @param ev {object}, a submit event.
  * return void.
  */
@@ -21,7 +20,6 @@ function saveOptions(ev) {
 
 /**
  * Restore options from `chrome.storage`.
- *
  * return void.
  */
 function restoreOptions() {
