@@ -22,8 +22,9 @@ function mkHstsCompat(url) {
      * @return {boolean}.
      */
     var isHstsCompat = function(domainPtrn) {
-        domainPtrn = domainPtrn.replace('*.', '[\w.-]*');
+        domainPtrn = domainPtrn.replace('*.', '^(?:[\\w.-]+\\.)?');
         domainPtrn = new RegExp(domainPtrn);
+        alert(domainPtrn);
         if (domainPtrn.test(url.hostname)) {
             return true;
         }
