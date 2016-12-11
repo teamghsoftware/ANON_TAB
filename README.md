@@ -26,7 +26,7 @@ ___Built on top of [DOMPurify](https://github.com/cure53/DOMPurify).___
 <a href="https://raw.githubusercontent.com/0xsobky/AnonTab/master/screenshots/ipleaks.png" target="blank"><img width=50% src="https://raw.githubusercontent.com/0xsobky/AnonTab/master/screenshots/ipl_thumb.png" alt="Leakproof against IPLeaks"></img></a>
 
 ## Is it secure?
-Likely yes. Unless you can bypass both of [_DOMPurify_](https://github.com/cure53/DOMPurify) and the restricted content security policy in place (plus a few more little restrictions).
+Likely yes. Unless you can bypass both of [_DOMPurify_](https://github.com/cure53/DOMPurify) and the restricted [content security policy](https://github.com/0xSobky/AnonTab/blob/master/src/manifest.json#L10) in place.
 
 ## Notes:
 * Users of the µBlock browser extension (or uBlock Origin) are advised to add `ananontab.resource-scheme` to their whitelist.
