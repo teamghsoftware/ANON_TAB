@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "AnonTab",
-  "version": "1.6",
+  "version": "1.6.1",
   "author": "@0xSobky",
   "incognito": "split",
   "options_page": "options.html",
