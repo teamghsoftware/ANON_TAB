@@ -15,7 +15,7 @@ ___Built on top of [DOMPurify](https://github.com/cure53/DOMPurify).___
 
 ## Downloads:
 * For Firefox: [AnonTab.xpi](https://github.com/0xsobky/AnonTab/raw/master/downloads/AnonTab.xpi) (also on [store](https://addons.mozilla.org/en-US/firefox/addon/anontab/))
-* For Chromium-based browsers: [AnonTab.crx](https://github.com/0xsobky/AnonTab/raw/master/downloads/AnonTab.crx)
+* For Chromium-based browsers: [AnonTab.crx](https://github.com/0xsobky/AnonTab/raw/master/downloads/AnonTab.crx) ([Opera](https://addons.opera.com/en/extensions/details/anontab/))
 
 ## Does it leak?
 
