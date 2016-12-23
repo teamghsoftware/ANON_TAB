@@ -171,14 +171,10 @@ function loadResource(resourceUrl, type) {
  */
 function initNav(ev) {
     'use strict';
-    var linkUrl;
-    if (ev) {
-        linkUrl = ev.linkUrl;
-        if (linkUrl || ev.keyCode === 13) {
-            navigate(linkUrl || navbar.value);
-        }
-    } else {
-        navigate(navbar.value);
+    var keyCode = ev.keyCode;
+    var linkUrl = ev.linkUrl || navbar.value;
+    if (linkUrl && (!keyCode || keyCode === 13)) {
+        navigate(linkUrl);
     }
 }
 
