@@ -1,17 +1,19 @@
 html {
     height: 100%;
 }
+
 body {
-    background: #5B606B url("../images/bg.jpg");
+    background: #5B606B url(../images/bg.jpg);
     color: white;
     font-family: arial;
     font-size: 27px;
     height: 100%;
-    margin: 5px 0px 0px 0px;
-    opacity: 0.94;
+    margin: 5px 0 0 0;
+    opacity: .94;
     overflow: hidden;
     text-align: center;
 }
+
 .input {
     background: white;
     border: 1px solid silver;
@@ -21,14 +23,16 @@ body {
     margin-bottom: 5px;
     min-height: 32px;
 }
+
 #go {
     height: 36px;
     left: -8px;
     position: relative;
 }
+
 #viewer {
-    border: 2px dashed silver;
     background: white;
+    border: 2px dashed silver;
     height: 93%;
     width: 98%;
 }
