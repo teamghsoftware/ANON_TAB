@@ -96,7 +96,7 @@ function loadResource(resourceUrl, type) {
     /**
      * Change the viewer's border color.
      * @param color {string}, a color name.
-     * @param loadingFlag {boolean}, sets loading status.
+     * @param loadingFlag {boolean}, determines loading status.
      * @return void.
      */
     var changeBorderColor = function(color, loadingFlag) {
