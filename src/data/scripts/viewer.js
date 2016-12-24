@@ -1,4 +1,4 @@
-// Document's current location
+// Document's current location.
 var docHref = location.hash;
 
 /**
@@ -13,7 +13,7 @@ function receive(data) {
     var type = data.dataType;
     var dataVal = data.dataVal;
     /**
-     * modify the innerHTML property of the body element.
+     * Modify the innerHTML property of the body element.
      * @param data {string}, a markup string.
      * @param reset {boolean}, a switch to reset the body.
      * @return void.
@@ -27,7 +27,7 @@ function receive(data) {
         body.innerHTML += dataVal;
     };
     /**
-     * view media elements.
+     * View media elements.
      * @param url {string}, a URL string.
      * @param type {string}, the element's tag name.
      * @return void.
@@ -43,7 +43,10 @@ function receive(data) {
         setBody('', true);
         document.body.appendChild(el);
     };
-    // prefix all links by '#'
+    /**
+     * Prefix all links by '#'.
+     * @return void.
+     */
     var linkify = function() {
         var link, href;
         var links = document.links;
@@ -59,7 +62,10 @@ function receive(data) {
             link.href = href;
         }
     };
-    // make GET forms functional
+    /**
+     * Make GET forms functional.
+     * @return void.
+     */
     var formify = function() {
         var form, formAction;
         var forms = document.forms;
@@ -83,7 +89,11 @@ function receive(data) {
             location.hash = encodeURI(formAction + '?' + params.join('&'));
             return false;
         };
-        var formHandle = function() {
+        /**
+         * Handle unsupported form types.
+         * @return {boolean}.
+         */
+        var handleForm = function() {
             alert('Form type not supported.');
             return false;
         };
@@ -93,7 +103,7 @@ function receive(data) {
             if (form.method === 'get' && form.action) {
                 form.onsubmit = formSubmit;
             } else {
-                form.onsubmit = formHandle;
+                form.onsubmit = handleForm;
             }
         }
     };
@@ -118,7 +128,7 @@ function receive(data) {
         document.body.style.wordWrap = 'break-word';
     } else if(type === 'href') {
         if (dataVal === location.hash.slice(1)) {
-            // reset the hash silently
+            // Reset the hash silently.
             history.pushState(null, null, '#');
         }
         location.hash = dataVal;
@@ -144,7 +154,7 @@ window.onhashchange = function() {
     }
 };
 
-// A defense in depth against redirections
+// A defense in depth against redirections.
 window.onunload = function() {
     'use strict';
     window.stop();
