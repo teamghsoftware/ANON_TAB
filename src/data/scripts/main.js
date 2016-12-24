@@ -1,4 +1,5 @@
 var proxy;
+var isLoading = false;
 var viewer = document.getElementById('viewer');
 var navbar = document.getElementById('navbar');
 var hsts_list = ['*.wikipedia.org', '*.twitter.com', '*.github.com',
@@ -10,6 +11,32 @@ chrome.storage.local.get({
 });
 
 /**
+ * Change the viewer's border color.
+ * @param color {string}, a color name.
+ * @param loadingFlag {boolean}, sets loading status.
+ * @return void.
+ */
+function changeBorderColor(color, loadingFlag) {
+    var interval;
+    if (loadingFlag) {
+        interval = setInterval(function() {
+            if (isLoading) {
+                changeBorderColor('red');
+                setTimeout(function () {
+                    if (isLoading) {
+                        changeBorderColor('green');
+                    }
+                }, 400);
+            } else {
+                clearInterval(interval);
+                changeBorderColor('silver');
+            }
+        }, 800);
+    }
+    viewer.style.borderColor = color;
+}
+
+/**
  * Enforce HSTS for all predefined compatible domains.
  * @param url {object}, a URL object.
  * @return {string}, a URL string.
@@ -17,7 +44,7 @@ chrome.storage.local.get({
 function mkHstsCompat(url) {
     'use strict';
     /**
-     * assert it's a known HSTS compatible domain.
+     * Assert it's a known HSTS compatible domain.
      * @param domainPtrn {string}, a domain name pattern.
      * @return {boolean}.
      */
@@ -80,7 +107,7 @@ function loadResource(resourceUrl, type) {
     var exts = /(?:\.(?:s?html?|php|cgi|txt|(?:j|a)spx?|json|py|pl|cfml?)|\/(?:[^.]*|[^a-z?#]+))(?:[?#].*)?$/i;
     var url = proxy + encodeURIComponent(resourceUrl);
     /**
-     * fetch an external resource.
+     * Fetch an external resource.
      * @param type {string}, the type of the resource.
      * @return void.
      */
@@ -89,6 +116,7 @@ function loadResource(resourceUrl, type) {
         xhrReq.responseType = (type === 'resource') ? 'blob' : 'text';
         xhrReq.onerror = function() {
             alert('NetworkError: A network error occurred.');
+            isLoading = false;
         };
         xhrReq.onload = function() {
             var file, assert, reader;
@@ -112,13 +140,13 @@ function loadResource(resourceUrl, type) {
                     return;
                 }
             }
-            // parse HTML markup
+            // Parse HTML markup.
             var docParse = function() {
                 var html = proxify(xhrReq.responseText, proxy, resourceUrl);
-                // pass all sanitized markup to the viewer
+                // Pass all sanitized markup to the viewer.
                 passData('document', html);
                 if (/#.+/.test(resourceUrl)) {
-                    // scroll to a given page anchor
+                    // Scroll to a given page anchor.
                     navigate('#' + resourceUrl.match(/#.+/));
                 }
             };
@@ -141,22 +169,25 @@ function loadResource(resourceUrl, type) {
                 alert('HTTPError: ' + this.status + ' ' + this.statusText);
                 docParse();
             }
+            isLoading = false;
         };
         xhrReq.open('GET', url);
         xhrReq.send();
+        isLoading = true;
+        changeBorderColor('green', true);
     };
     if (typeof type === 'string') {
         fetch(type);
-    // is it a document?
+    // Is it a document?
     } else if (exts.test(resourceUrl)) {
         fetch('text');
-    // perhaps an image?
+    // Perhaps an image?
     } else if(/\.(?:jpe?g|png|gif|bmp)(?:[?#].*)?$/i.test(resourceUrl)) {
         passData('img', url);
-    // maybe some audio file?
+    // Maybe some audio file?
     } else if(/\.(?:mp3|wav)(?:[?#].*)?$/i.test(resourceUrl)) {
         passData('audio', url);
-    // probably a video?
+    // Probably a video?
     } else if(/\.(?:mp4|webm|ogg)(?:[?#].*)?$/i.test(resourceUrl)) {
         passData('video', url);
     } else {
@@ -165,7 +196,7 @@ function loadResource(resourceUrl, type) {
 }
 
 /**
- * A proxy function for `navigate()`.
+ * A proxy function for `navigate`.
  * @param ev {object} optional, an event object.
  * @return void.
  */
@@ -192,11 +223,11 @@ function receive(data) {
         linkUrl = mkHstsCompat(linkUrl);
     } catch(e) {}
     navbar.value = linkUrl;
-    // reset the view
+    // Reset the view.
     passData('', '');
     loadResource(linkUrl, type);
 }
 
-// Register event listeners for direct gesture-based navigations
+// Register event listeners for direct gesture-based navigations.
 document.getElementById('go').onclick = navbar.onkeydown = initNav;
 chrome.runtime.onMessage.addListener(initNav);
