@@ -11,55 +11,49 @@ chrome.storage.local.get({
 });
 
 /**
- * Change the viewer's border color.
- * @param color {string}, a color name.
- * @param loadingFlag {boolean}, sets loading status.
- * @return void.
+ * Normalize a given URL.
+ * @param url {string}, a URI string.
+ * @param isSilent {boolean}, prevents function alerts.
+ * @return {string}, an normalized URL string.
  */
-function changeBorderColor(color, loadingFlag) {
-    var interval;
-    if (loadingFlag) {
-        interval = setInterval(function() {
-            if (isLoading) {
-                changeBorderColor('red');
-                setTimeout(function () {
-                    if (isLoading) {
-                        changeBorderColor('green');
-                    }
-                }, 400);
-            } else {
-                clearInterval(interval);
-                changeBorderColor('silver');
-            }
-        }, 800);
-    }
-    viewer.style.borderColor = color;
-}
-
-/**
- * Enforce HSTS for all predefined compatible domains.
- * @param url {object}, a URL object.
- * @return {string}, a URL string.
- */
-function mkHstsCompat(url) {
+function normalizeURL (url, isSilent) {
     'use strict';
     /**
-     * Assert it's a known HSTS compatible domain.
-     * @param domainPtrn {string}, a domain name pattern.
-     * @return {boolean}.
+     * Enforce HSTS for all predefined compatible domains.
+     * @param url {object}, a URL object.
+     * @return {string}, a URL string.
      */
-    var isHstsCompat = function(domainPtrn) {
-        domainPtrn = domainPtrn.replace('*.', '^(?:[\\w.-]+\\.)?');
-        domainPtrn = new RegExp(domainPtrn);
-        if (domainPtrn.test(url.hostname)) {
-            return true;
+    var mkHstsCompat = function(url) {
+        /**
+         * Assert it's a known HSTS compatible domain.
+         * @param domainPtrn {string}, a domain name pattern.
+         * @return {boolean}.
+         */
+        var isHstsCompat = function(domainPtrn) {
+            domainPtrn = domainPtrn.replace('*.', '^(?:[\\w.-]+\\.)?');
+            domainPtrn = new RegExp(domainPtrn);
+            if (domainPtrn.test(url.hostname)) {
+                return true;
+            }
+            return false;
+        };
+        if (url.protocol === 'http:' && hstsList.some(isHstsCompat)) {
+            url.protocol = 'https:';
         }
-        return false;
+        return url.href;
     };
-    if (url.protocol === 'http:' && hstsList.some(isHstsCompat)) {
-        url.protocol = 'https:';
+    url = (/^\w+:\/\//.test(url)) ? url : 'http://' + url;
+    try {
+        url = new URL(url);
+    } catch (e) {
+        if (!isSilent) {
+            setTimeout(function() {
+                alert('Error: "' + url + '" is not a valid URL.');
+            }, 100);
+        }
+        return;
     }
-    return url.href;
+    return mkHstsCompat(url);
 }
 
 /**
@@ -71,7 +65,7 @@ function mkHstsCompat(url) {
  */
 function passData(type, data, target) {
     'use strict';
-    viewer.contentWindow.receive(
+    viewer.contentWindow.communicate(
         {proxyUrl: proxy, dataType: type, dataVal: data, targetPage: target}
     );
 }
@@ -84,14 +78,7 @@ function passData(type, data, target) {
 function navigate(linkUrl) {
     'use strict';
     if (!linkUrl.startsWith('#')) {
-        linkUrl = (/^\w+:\/\//.test(linkUrl)) ? linkUrl : 'http://'+linkUrl;
-        try {
-            linkUrl = new URL(linkUrl);
-        } catch(e) {
-            alert('Error: "' + linkUrl + '" is not a valid URL.');
-            return;
-        }
-        linkUrl = mkHstsCompat(linkUrl);
+        linkUrl = normalizeURL(linkUrl);
     }
     passData('href', linkUrl);
 }
@@ -106,6 +93,31 @@ function loadResource(resourceUrl, type) {
     'use strict';
     var url = proxy + encodeURIComponent(resourceUrl);
     var exts = /(?:\.(?:s?html?|php|cgi|txt|(?:j|a)spx?|json|py|pl|cfml?)|\/(?:[^.]*|[^a-z?#]+))(?:[?#].*)?$/i;
+    /**
+     * Change the viewer's border color.
+     * @param color {string}, a color name.
+     * @param loadingFlag {boolean}, sets loading status.
+     * @return void.
+     */
+    var changeBorderColor = function(color, loadingFlag) {
+        var interval;
+        if (loadingFlag) {
+            interval = setInterval(function() {
+                if (isLoading) {
+                    changeBorderColor('red');
+                    setTimeout(function () {
+                        if (isLoading) {
+                            changeBorderColor('green');
+                        }
+                    }, 400);
+                } else {
+                    clearInterval(interval);
+                    changeBorderColor('silver');
+                }
+            }, 800);
+        }
+        viewer.style.borderColor = color;
+    };
     /**
      * Fetch an external resource.
      * @param type {string}, the type of the resource.
@@ -140,19 +152,24 @@ function loadResource(resourceUrl, type) {
                     return;
                 }
             }
-            // Parse HTML markup.
-            var parseDoc = function() {
-                var html = proxify(xhrReq.responseText, proxy, resourceUrl);
-                // Pass all sanitized markup to the viewer.
-                passData('document', html);
-                if (/#.+/.test(resourceUrl)) {
-                    // Scroll to a given page anchor.
-                    navigate('#' + resourceUrl.match(/#.+/));
+            /**
+             * Parse the `responseText` property of `xhrReq`.
+             * @return void.
+             */
+            var parseResponse = function() {
+                if (xhrReq.responseType === 'text') {
+                    var html = proxify(xhrReq.responseText, proxy, resourceUrl);
+                    // Pass all sanitized markup to the viewer.
+                    passData('document', html);
+                    if (/#.+/.test(resourceUrl)) {
+                        // Scroll to a given page anchor.
+                        navigate('#' + resourceUrl.match(/#.+/));
+                    }
                 }
             };
             if (this.status === 200) {
                 if (type === 'text') {
-                    parseDoc();
+                    parseResponse();
                 } else {
                     file = this.response;
                     if (file.size >= 9000000) {
@@ -167,7 +184,7 @@ function loadResource(resourceUrl, type) {
                 }
             } else {
                 alert('HTTPError: ' + this.status + ' ' + this.statusText);
-                parseDoc();
+                parseResponse();
             }
             isLoading = false;
         };
@@ -196,6 +213,25 @@ function loadResource(resourceUrl, type) {
 }
 
 /**
+ * Send and receive data from other scripts.
+ * @param data {object}, a data container object.
+ * @return void.
+ */
+function communicate(data) {
+    'use strict';
+    var type = data.type;
+    var linkUrl = normalizeURL(data.linkUrl);
+    if (linkUrl) {
+        loadResource(linkUrl, type);
+    } else {
+        linkUrl = data.linkUrl;
+    }
+    navBar.value = linkUrl;
+    // Reset the view.
+    passData('', '');
+}
+
+/**
  * A proxy function for `navigate`.
  * @param ev {object} optional, an event object.
  * @return void.
@@ -210,25 +246,6 @@ function initNav(ev) {
     if (ev.type === 'submit') {
         ev.preventDefault();
     }
-}
-
-/**
- * Receive data sent by the viewer.
- * @param data {object}, a data container object.
- * @return void.
- */
-function receive(data) {
-    'use strict';
-    var type = data.type;
-    var linkUrl = data.linkUrl;
-    try {
-        linkUrl = new URL(linkUrl);
-        linkUrl = mkHstsCompat(linkUrl);
-        loadResource(linkUrl, type);
-    } catch(e) {}
-    navBar.value = linkUrl;
-    // Reset the view.
-    passData('', '');
 }
 
 // Register event listeners to handle gesture-based navigations.

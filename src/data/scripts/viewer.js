@@ -2,11 +2,11 @@
 var docHref = location.hash;
 
 /**
- * Recieve data sent by other scripts.
+ * Send and receive data from other scripts.
  * @param data {object}, a container object.
  * @return void.
  */
-function receive(data) {
+function communicate(data) {
     'use strict';
     var target, _target, styleEl;
     var proxy = data.proxyUrl;
@@ -38,7 +38,7 @@ function receive(data) {
         el.controls = true;
         el.onerror = function() {
             url = decodeURIComponent(url.replace(proxy, ''));
-            parent.receive({linkUrl: url, type: 'text'});
+            parent.communicate({linkUrl: url, type: 'text'});
         };
         setBody('', true);
         document.body.appendChild(el);
@@ -143,8 +143,8 @@ window.onhashchange = function() {
     var hash = location.hash.slice(1);
     if (hash) {
         if (hash.indexOf('#') !== 0) {
-            parent.receive({linkUrl: hash, type: null});
-            docHref = hash;
+            parent.communicate({linkUrl: hash});
+            docHref = parent.normalizeURL(hash, true);
         } else {
             anchor = document.getElementsByName(hash.slice(1))[0];
             if (typeof anchor === 'object') {
