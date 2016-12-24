@@ -14,7 +14,7 @@ chrome.storage.local.get({
  * Normalize a given URL.
  * @param url {string}, a URI string.
  * @param isSilent {boolean}, prevents function alerts.
- * @return {string}, an normalized URL string.
+ * @return {string}, a normalized URL string.
  */
 function normalizeURL (url, isSilent) {
     'use strict';
