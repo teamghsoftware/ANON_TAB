@@ -16,7 +16,7 @@ chrome.storage.local.get({
  * @param isSilent {boolean}, prevents function alerts.
  * @return {string}, a normalized URL string.
  */
-function normalizeURL (url, isSilent) {
+function normalizeURL(url, isSilent) {
     'use strict';
     /**
      * Enforce HSTS for all predefined compatible domains.
