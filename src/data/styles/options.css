@@ -23,7 +23,7 @@ body {
 }
 
 span[data-help] {
-    color: silver;
+    color: white;
     cursor: help;
     left: 10px;
     position: relative;
