@@ -1,8 +1,8 @@
 var proxy;
 var isLoading = false;
 var viewer = document.getElementById('viewer');
-var navbar = document.getElementById('navbar');
-var hsts_list = ['*.wikipedia.org', '*.twitter.com', '*.github.com',
+var navBar = document.getElementById('navbar');
+var hstsList = ['*.wikipedia.org', '*.twitter.com', '*.github.com',
                      '*.facebook.com', '*.torproject.org'];
 chrome.storage.local.get({
     proxy: 'https://feedback.googleusercontent.com/gadgets/proxy?container=fbk&url='
@@ -56,7 +56,7 @@ function mkHstsCompat(url) {
         }
         return false;
     };
-    if (url.protocol === 'http:' && hsts_list.some(isHstsCompat)) {
+    if (url.protocol === 'http:' && hstsList.some(isHstsCompat)) {
         url.protocol = 'https:';
     }
     return url.href;
@@ -88,7 +88,7 @@ function navigate(linkUrl) {
         try {
             linkUrl = new URL(linkUrl);
         } catch(e) {
-            alert(e.message);
+            alert('Error: "' + linkUrl + '" is not a valid URL.');
             return;
         }
         linkUrl = mkHstsCompat(linkUrl);
@@ -104,8 +104,8 @@ function navigate(linkUrl) {
  */
 function loadResource(resourceUrl, type) {
     'use strict';
-    var exts = /(?:\.(?:s?html?|php|cgi|txt|(?:j|a)spx?|json|py|pl|cfml?)|\/(?:[^.]*|[^a-z?#]+))(?:[?#].*)?$/i;
     var url = proxy + encodeURIComponent(resourceUrl);
+    var exts = /(?:\.(?:s?html?|php|cgi|txt|(?:j|a)spx?|json|py|pl|cfml?)|\/(?:[^.]*|[^a-z?#]+))(?:[?#].*)?$/i;
     /**
      * Fetch an external resource.
      * @param type {string}, the type of the resource.
@@ -141,7 +141,7 @@ function loadResource(resourceUrl, type) {
                 }
             }
             // Parse HTML markup.
-            var docParse = function() {
+            var parseDoc = function() {
                 var html = proxify(xhrReq.responseText, proxy, resourceUrl);
                 // Pass all sanitized markup to the viewer.
                 passData('document', html);
@@ -152,7 +152,7 @@ function loadResource(resourceUrl, type) {
             };
             if (this.status === 200) {
                 if (type === 'text') {
-                    docParse();
+                    parseDoc();
                 } else {
                     file = this.response;
                     if (file.size >= 9000000) {
@@ -167,7 +167,7 @@ function loadResource(resourceUrl, type) {
                 }
             } else {
                 alert('HTTPError: ' + this.status + ' ' + this.statusText);
-                docParse();
+                parseDoc();
             }
             isLoading = false;
         };
@@ -203,9 +203,12 @@ function loadResource(resourceUrl, type) {
 function initNav(ev) {
     'use strict';
     var keyCode = ev.keyCode;
-    var linkUrl = ev.linkUrl || navbar.value;
+    var linkUrl = ev.linkUrl || navBar.value;
     if (linkUrl && (!keyCode || keyCode === 13)) {
         navigate(linkUrl);
+    }
+    if (ev.type === 'submit') {
+        ev.preventDefault();
     }
 }
 
@@ -216,18 +219,18 @@ function initNav(ev) {
  */
 function receive(data) {
     'use strict';
-    var linkUrl = data.linkUrl;
     var type = data.type;
+    var linkUrl = data.linkUrl;
     try {
         linkUrl = new URL(linkUrl);
         linkUrl = mkHstsCompat(linkUrl);
+        loadResource(linkUrl, type);
     } catch(e) {}
-    navbar.value = linkUrl;
+    navBar.value = linkUrl;
     // Reset the view.
     passData('', '');
-    loadResource(linkUrl, type);
 }
 
-// Register event listeners for direct gesture-based navigations.
-document.getElementById('go').onclick = navbar.onkeydown = initNav;
+// Register event listeners to handle gesture-based navigations.
+document.getElementById('navform').onsubmit = initNav;
 chrome.runtime.onMessage.addListener(initNav);
