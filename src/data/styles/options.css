@@ -1,18 +1,46 @@
 body {
-    background: #5B606B url("../images/bg.jpg");
+    background: #5B606B url(../images/bg.jpg);
     color: white;
-    font-size: 27px;
-    margin: 5px 0px 0px 0px;
-    opacity: 0.9;
+    font: 27px georgia;
+    margin: 5px 0 0 0;
+    opacity: .9;
     text-align: center;
 }
+
 .input {
     background: white;
-    border: 1px solid silver;
+    border: 1px dotted silver;
     border-radius: 3px;
-    box-shadow: 0px 0px 5px #DDD inset;
     font-size: 20px;
     margin-bottom: 5px;
     min-height: 36px;
     min-width: 800px;
+}
+
+#proxyInpt {
+    left: 10px;
+    position: relative;
+}
+
+span[data-help] {
+    color: silver;
+    cursor: help;
+    left: 10px;
+    position: relative;
+    z-index: 2;
+}
+
+span[data-help]:hover::after {
+    background-color: gray;
+    border: 1px #aaaaaa solid;
+    border-radius: 10px;
+    color: white;
+    content: attr(data-help);
+    font-size: 14px;
+    left: 0;
+    min-width: 200px;
+    padding: 10px;
+    position: absolute;
+    text-align: center;
+    z-index: 3;
 }

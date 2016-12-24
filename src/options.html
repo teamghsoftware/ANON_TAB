@@ -4,15 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <title>AnonTab Settings</title>
-    <link rel="stylesheet" type="text/css" href="./data/styles/options.css">
+    <link rel="shortcut icon" href="./data/images/icon_32.png">
+    <link rel="stylesheet" href="./data/styles/options.css">
 </head>
 
 <body>
     Proxy URI:
     <form id="form">
-        <input type="text" id="proxyInpt" class="input" value="">
+        <input type="url" pattern="https://.+" id="proxyInpt" class="input" value="">
+        <span data-help="Make sure the proxy server returns a proper Access-Control-Allow-Origin HTTP header, and that the proxy URI follows this pattern: https://proxy.tld/?url=">?</span>
         <div id="status"></div>
-        <button id="save" class="input">Save</button>
+        <button id="save" class="input">Validate and Save</button>
         <button id="reset" class="input">Reset</button>
     </form>
     <script src="./data/scripts/options.js"></script>
