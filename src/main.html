@@ -12,9 +12,11 @@
 
 <body>
     <!-- Start of GUI Elements -->
-    <b>/NavBar/:</b>
-    <input type="text" id="navbar" placeholder="http://example.com" size="42" class="input" autofocus>
-    <input type="button" id="go" value="Go!" class="input">
+    <form id="navform">
+        <b>/NavBar/:</b>
+        <input type="text" id="navbar" placeholder="http://example.com" size="42" class="input" autofocus required>
+        <input type="submit" id="go" value="Go!" class="input">
+    </form>
     <iframe id="viewer" src="./viewer.html"></iframe>
     <!-- End of GUI Elements -->
     <script src="./data/scripts/main.js"></script>
