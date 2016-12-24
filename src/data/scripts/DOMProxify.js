@@ -8,7 +8,7 @@
 function proxify(raw, proxy, baseURL) {
     'use strict';
     var clean;
-    // DOMPurify's config
+    // DOMPurify's config.
     var config = {
         ADD_TAGS: ['link', 'video', 'audio'],
         FORBID_ATTR: ['xlink:href'],
@@ -16,7 +16,7 @@ function proxify(raw, proxy, baseURL) {
     };
 
     /**
-     * proxify both relative and absolute URIs.
+     * Proxify both relative and absolute URIs.
      * @param uri {string}, a URI string.
      * @return {string}, a proxified URL string.
      */
@@ -30,7 +30,7 @@ function proxify(raw, proxy, baseURL) {
     };
 
     /**
-     * handle any external CSS styles.
+     * Handle any external CSS styles.
      * @return void.
      */
     var addExtStyles = function() {
@@ -40,7 +40,7 @@ function proxify(raw, proxy, baseURL) {
     };
 
     /**
-     * fetch external CSS files.
+     * Fetch external CSS files.
      * @param src {string}, a URI string.
      * @return void.
      */
@@ -53,7 +53,7 @@ function proxify(raw, proxy, baseURL) {
     };
 
     /**
-     * take CSS property-value pairs and proxify URLs in values,
+     * Take CSS property-value pairs and proxify URLs in values,
      * then add the styles to an array of property-value pairs.
      * @param output {array}, a container empty array.
      * @param styles {array}, a styles container array.
@@ -61,7 +61,7 @@ function proxify(raw, proxy, baseURL) {
      */
     var proxStyles = function(output, styles) {
         var prop, pVal, src;
-        // the regex to detect external content
+        // The regex to detect external content.
         var regex = /(?:url\(["']?)(?!data:)([^'")]+)/gi;
         var pIndex = styles.length;
         while (pIndex--) {
@@ -79,7 +79,7 @@ function proxify(raw, proxy, baseURL) {
     };
 
     /**
-     * take CSS rules and analyze them, proxify URIs via `proxStyles()`,
+     * Take CSS rules and analyze them, proxify URIs via `proxStyles()`,
      * then create matching CSS text for later application to the DOM.
      * @param output {array}, a container empty array.
      * @param cssRules {array}, a CSSRuleList object.
@@ -91,7 +91,7 @@ function proxify(raw, proxy, baseURL) {
         while (rIndex--) {
             rule = cssRules[rIndex];
             switch (rule.type) {
-                // a selector rule?
+                // A selector rule?
                 case 1:
                     if (rule.selectorText) {
                         output.push(rule.selectorText + '{');
@@ -101,13 +101,13 @@ function proxify(raw, proxy, baseURL) {
                         output.push('}');
                     }
                     break;
-                // a @media rule?
+                // A @media rule?
                 case rule.MEDIA_RULE:
                     output.push('@media ' + rule.media.mediaText + '{');
                     addCSSRules(output, rule.cssRules);
                     output.push('}');
                     break;
-                // a @font-face rule?
+                // A @font-face rule?
                 case rule.FONT_FACE_RULE:
                     output.push('@font-face {');
                     if (rule.style) {
@@ -115,7 +115,7 @@ function proxify(raw, proxy, baseURL) {
                     }
                     output.push('}');
                     break;
-                // a @keyframes rule?
+                // A @keyframes rule?
                 case rule.KEYFRAMES_RULE:
                     output.push('@keyframes ' + rule.name + '{');
                     _rIndex = rule.cssRules.length;
@@ -131,7 +131,7 @@ function proxify(raw, proxy, baseURL) {
                     }
                     output.push('}');
                     break;
-                // an @import rule?
+                // An @import rule?
                 case rule.IMPORT_RULE:
                     importSrc = rule.href;
                     if (importSrc) {
@@ -142,7 +142,7 @@ function proxify(raw, proxy, baseURL) {
         }
     };
 
-    // enforce proxy for leaky CSS rules
+    // Enforce proxy for leaky CSS rules.
     DOMPurify.addHook('uponSanitizeElement', function(node, data) {
         var cssRules, output;
         if (data.tagName === 'style' && node.sheet) {
@@ -160,10 +160,10 @@ function proxify(raw, proxy, baseURL) {
         }
     });
 
-    // enforce proxy for all src attributes incl. style attributes
+    // Enforce proxy for both src attributes and style attributes.
     DOMPurify.addHook('afterSanitizeAttributes', function(node) {
         var attrib, styles, output;
-        // proxify a URL in case it's not a data URI or an anchor
+        // Proxify a URL in case it's not a data URI or an anchor.
         var proxAttribute = function(uri) {
             if (/^(data:|#)/i.test(uri)) {
                 return uri;
@@ -171,7 +171,7 @@ function proxify(raw, proxy, baseURL) {
                 return proxUri(uri);
             }
         };
-        // attributes to proxify
+        // Attributes to proxify.
         var attributes = ['href', 'src', 'action', 'background', 'poster'];
         var aIndex = attributes.length;
         while (aIndex--) {
@@ -188,7 +188,7 @@ function proxify(raw, proxy, baseURL) {
             if (styles) {
                 proxStyles(output, styles);
             }
-            // re-add styles in case any are left
+            // Re-add styles in case any are left.
             if (output.length) {
                 node.setAttribute('style', output.join(''));
             } else {
@@ -197,10 +197,10 @@ function proxify(raw, proxy, baseURL) {
         }
     });
 
-    // sanitize our HTML markup
+    // Sanitize our HTML markup.
     clean = DOMPurify.sanitize(raw, config);
 
-    // reset all hooks before returning
+    // Reset all hooks before returning.
     DOMPurify.removeAllHooks();
     return clean;
 }
