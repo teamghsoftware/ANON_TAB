@@ -69,39 +69,46 @@ function communicate(data) {
     var formify = function() {
         var form, formAction;
         var forms = document.forms;
-        var formSubmit = function() {
+        /**
+         * Submit a GET form indirectly.
+         * @param ev {object}, a submit event.
+         * @return void.
+         */
+        var submitForm = function(ev) {
             var params = [];
-            var queryBuild = function(container) {
-                var el;
+            var buildQuery = function(container) {
+                var el, paramValue;
                 var childElms = container.children;
                 var index = childElms.length;
                 while (index--) {
                     el = childElms[index];
-                    if (el.hasAttribute('name') && el.value) {
-                        params.push(el.name + '=' + el.value);
+                    if (el.hasAttribute('name')) {
+                        paramValue = '=' + (el.value || '');
+                        params.push(el.name + paramValue);
                     } else if(el.children) {
-                        queryBuild(el);
+                        buildQuery(el);
                     }
                 }
             };
-            queryBuild(this);
+            buildQuery(this);
             formAction = decodeURIComponent(this.action.replace(proxy, ''));
             location.hash = encodeURI(formAction + '?' + params.join('&'));
-            return false;
+            ev.preventDefault();
         };
         /**
          * Handle unsupported form types.
-         * @return {boolean}.
+         * @param ev {object}, a submit event.
+         * @return void.
          */
-        var handleForm = function() {
+        var handleForm = function(ev) {
             alert('Form type not supported.');
-            return false;
+            ev.preventDefault();
         };
         var index = forms.length;
         while (index--) {
             form = forms[index];
             if (form.method === 'get' && form.action) {
-                form.onsubmit = formSubmit;
+                form.onsubmit = submitForm;
             } else {
                 form.onsubmit = handleForm;
             }

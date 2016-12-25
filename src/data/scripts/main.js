@@ -51,7 +51,7 @@ function normalizeURL(url, isSilent) {
                 alert('Error: "' + url + '" is not a valid URL.');
             }, 100);
         }
-        return;
+        return '';
     }
     return mkHstsCompat(url);
 }
@@ -80,7 +80,9 @@ function navigate(linkUrl) {
     if (!linkUrl.startsWith('#')) {
         linkUrl = normalizeURL(linkUrl);
     }
-    passData('href', linkUrl);
+    if (linkUrl) {
+        passData('href', linkUrl);
+    }
 }
 
 /**
