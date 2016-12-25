@@ -24,6 +24,10 @@ body {
     min-height: 32px;
 }
 
+#navbar {
+    box-sizing: content-box;
+}
+
 #go {
     height: 36px;
     left: -8px;
