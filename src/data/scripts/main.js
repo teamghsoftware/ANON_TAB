@@ -71,6 +71,15 @@ function passData(type, data, target) {
 }
 
 /**
+ * Terminate any ongoing connections.
+ * @return void.
+ */
+function stopLoading() {
+    isLoading = false;
+    window.stop();
+}
+
+/**
  * Navigate to a given URL.
  * @param linkUrl {string}, a URL to navigate to.
  * @return void.
@@ -81,6 +90,7 @@ function navigate(linkUrl) {
         linkUrl = normalizeURL(linkUrl);
     }
     if (linkUrl) {
+        stopLoading();
         passData('href', linkUrl);
     }
 }
@@ -129,7 +139,9 @@ function loadResource(resourceUrl, type) {
         var xhrReq = new XMLHttpRequest();
         xhrReq.responseType = (type === 'resource') ? 'blob' : 'text';
         xhrReq.onerror = function() {
-            alert('NetworkError: A network error occurred.');
+            if (isLoading) {
+                alert('NetworkError: A network error occurred.');
+            }
             isLoading = false;
         };
         xhrReq.onload = function() {
@@ -228,6 +240,7 @@ function communicate(data) {
     var type = data.type;
     var linkUrl = normalizeURL(data.linkUrl);
     if (linkUrl) {
+        stopLoading();
         loadResource(linkUrl, type);
     } else {
         linkUrl = data.linkUrl;
