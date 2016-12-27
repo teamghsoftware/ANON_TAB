@@ -85,7 +85,7 @@ function communicate(data) {
                     if (el.hasAttribute('name')) {
                         paramValue = '=' + (el.value || '');
                         params.push(el.name + paramValue);
-                    } else if(el.children) {
+                    } else if (el.children) {
                         buildQuery(el);
                     }
                 }
@@ -118,7 +118,7 @@ function communicate(data) {
         setBody(dataVal, true);
         linkify();
         formify();
-    } else if(type === 'styles') {
+    } else if (type === 'styles') {
         target = data.targetPage;
         _target = docHref;
         if (target === _target) {
@@ -126,14 +126,14 @@ function communicate(data) {
             styleEl.innerHTML = dataVal;
             document.body.appendChild(styleEl);
         }
-    } else if(type === 'img' ||
+    } else if (type === 'img' ||
                   type === 'audio' ||
                       type === 'video') {
         viewMedia(dataVal, type);
-    } else if(type === 'resource') {
+    } else if (type === 'resource') {
         setBody(dataVal, true);
         document.body.style.wordWrap = 'break-word';
-    } else if(type === 'href') {
+    } else if (type === 'href') {
         if (dataVal === location.hash.slice(1)) {
             // Reset the hash silently.
             history.pushState(null, null, '#');

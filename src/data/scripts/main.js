@@ -3,7 +3,7 @@ var isLoading = false;
 var viewer = document.getElementById('viewer');
 var navBar = document.getElementById('navbar');
 var hstsList = ['*.wikipedia.org', '*.twitter.com', '*.github.com',
-                     '*.facebook.com', '*.torproject.org'];
+                '*.facebook.com', '*.torproject.org'];
 chrome.storage.local.get({
     proxy: 'https://feedback.googleusercontent.com/gadgets/proxy?container=fbk&url='
 }, function(items) {
@@ -14,7 +14,7 @@ chrome.storage.local.get({
  * Normalize a given URL.
  * @param url {string}, a URI string.
  * @param isSilent {boolean}, prevents function alerts.
- * @return {string}, a normalized URL string.
+ * @return {string}, either a normalized URL or an empty string.
  */
 function normalizeURL(url, isSilent) {
     'use strict';
@@ -135,25 +135,6 @@ function loadResource(resourceUrl, type) {
         xhrReq.onload = function() {
             var file, assert, reader;
             var responseType = this.getResponseHeader('content-type');
-            if (responseType && responseType.indexOf(type) !== 0) {
-                responseType = responseType.match(/^\w*/).toString();
-                if (responseType === 'text') {
-                    fetch('text');
-                    return;
-                } else if(responseType === 'image') {
-                    passData('img', url);
-                    return;
-                } else if(responseType === 'audio') {
-                    passData('audio', url);
-                    return;
-                } else if(responseType === 'video') {
-                    passData('video', url);
-                    return;
-                } else if(type !== 'resource') {
-                    fetch('resource');
-                    return;
-                }
-            }
             /**
              * Parse the `responseText` property of `xhrReq`.
              * @return void.
@@ -169,6 +150,27 @@ function loadResource(resourceUrl, type) {
                     }
                 }
             };
+            try {
+                if (responseType.indexOf(type) !== 0) {
+                    responseType = responseType.match(/^\w*/).toString();
+                    if (responseType === 'text') {
+                        fetch('text');
+                        return;
+                    } else if (responseType === 'image') {
+                        passData('img', url);
+                        return;
+                    } else if (responseType === 'audio') {
+                        passData('audio', url);
+                        return;
+                    } else if (responseType === 'video') {
+                        passData('video', url);
+                        return;
+                    } else if (type !== 'resource') {
+                        fetch('resource');
+                        return;
+                    }
+                }
+            } catch (e) {}
             if (this.status === 200) {
                 if (type === 'text') {
                     parseResponse();
@@ -191,9 +193,11 @@ function loadResource(resourceUrl, type) {
             isLoading = false;
         };
         xhrReq.open('GET', url);
+        setTimeout(function() {
+            isLoading = true;
+            changeBorderColor('green', true);
+        });
         xhrReq.send();
-        isLoading = true;
-        changeBorderColor('green', true);
     };
     if (typeof type === 'string') {
         fetch(type);
@@ -201,13 +205,13 @@ function loadResource(resourceUrl, type) {
     } else if (exts.test(resourceUrl)) {
         fetch('text');
     // Perhaps an image?
-    } else if(/\.(?:jpe?g|png|gif|bmp)(?:[?#].*)?$/i.test(resourceUrl)) {
+    } else if (/\.(?:jpe?g|png|gif|bmp)(?:[?#].*)?$/i.test(resourceUrl)) {
         passData('img', url);
     // Maybe some audio file?
-    } else if(/\.(?:mp3|wav)(?:[?#].*)?$/i.test(resourceUrl)) {
+    } else if (/\.(?:mp3|wav)(?:[?#].*)?$/i.test(resourceUrl)) {
         passData('audio', url);
     // Probably a video?
-    } else if(/\.(?:mp4|webm|ogg)(?:[?#].*)?$/i.test(resourceUrl)) {
+    } else if (/\.(?:mp4|webm|ogg)(?:[?#].*)?$/i.test(resourceUrl)) {
         passData('video', url);
     } else {
         fetch('resource');
@@ -234,7 +238,7 @@ function communicate(data) {
 }
 
 /**
- * A proxy function for `navigate`.
+ * A proxy function for `navigate()`.
  * @param ev {object} optional, an event object.
  * @return void.
  */

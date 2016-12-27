@@ -22,8 +22,8 @@ function proxify(raw, proxy, baseURL) {
      */
     var proxUri = function(uri) {
         uri = /^\w+:\/\//.test(uri) ? uri :
-              uri.startsWith('//') ? baseURL.match(/\w+:/)+uri :
-              uri.startsWith('/') ? baseURL.match(/\w+:\/\/[^\/]+/)+uri :
+              uri.startsWith('//') ? baseURL.match(/\w+:/) + uri :
+              uri.startsWith('/') ? baseURL.match(/\w+:\/\/[^\/]+/) + uri :
               baseURL.match(/\w+:\/\/[^\/]+/) + '/' + uri;
         uri = new URL(uri);
         return proxy + encodeURIComponent(uri);
@@ -79,14 +79,14 @@ function proxify(raw, proxy, baseURL) {
     };
 
     /**
-     * Take CSS rules and analyze them, proxify URIs via `proxStyles()`,
+     * Take CSS rules and analyze them, proxify URIs via `proxStyles`,
      * then create matching CSS text for later application to the DOM.
      * @param output {array}, a container empty array.
      * @param cssRules {array}, a CSSRuleList object.
      * @return void.
      */
     var addCSSRules = function(output, cssRules) {
-        var rule, _rIndex, frame, importSrc;
+        var _rIndex, frame, importSrc, rule;
         var rIndex = cssRules.length;
         while (rIndex--) {
             rule = cssRules[rIndex];
@@ -145,18 +145,18 @@ function proxify(raw, proxy, baseURL) {
     // Enforce proxy for leaky CSS rules.
     DOMPurify.addHook('uponSanitizeElement', function(node, data) {
         var cssRules, output;
-        if (data.tagName === 'style' && node.sheet) {
+        if (data.tagName === 'link') {
+            if (node.getAttribute('rel') === 'stylesheet') {
+                fetchStyles(node.getAttribute('href'));
+            }
+            node.parentNode.removeChild(node);
+        } else if (data.tagName === 'style' && node.sheet) {
             cssRules = node.sheet.cssRules;
             if (cssRules) {
                 output = [];
                 addCSSRules(output, cssRules);
                 node.textContent = output.join('\n');
             }
-        } else if(data.tagName === 'link') {
-            if (node.getAttribute('rel') === 'stylesheet') {
-                fetchStyles(node.getAttribute('href'));
-            }
-            node.parentNode.removeChild(node);
         }
     });
 
@@ -165,7 +165,7 @@ function proxify(raw, proxy, baseURL) {
         var attrib, styles, output;
         // Proxify a URL in case it's not a data URI or an anchor.
         var proxAttribute = function(uri) {
-            if (/^(data:|#)/i.test(uri)) {
+            if (/^(#|data:)/i.test(uri)) {
                 return uri;
             } else {
                 return proxUri(uri);
