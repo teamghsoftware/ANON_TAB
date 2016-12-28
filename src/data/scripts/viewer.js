@@ -2,7 +2,7 @@
 var docHref = location.hash;
 
 /**
- * Send and receive data from other scripts.
+ * Handle sent and received data from other scripts.
  * @param data {object}, a container object.
  * @return void.
  */
@@ -13,9 +13,9 @@ function communicate(data) {
     var type = data.dataType;
     var dataVal = data.dataVal;
     /**
-     * Modify the innerHTML property of the body element.
+     * Modify the `innerHTML` property of the body element.
      * @param data {string}, a markup string.
-     * @param reset {boolean}, a switch to reset the body.
+     * @param reset {boolean}, a flag to reset the body.
      * @return void.
      */
     var setBody = function(dataVal, reset) {
@@ -25,23 +25,6 @@ function communicate(data) {
             body.style.wordWrap = 'initial';
         }
         body.innerHTML += dataVal;
-    };
-    /**
-     * View media elements.
-     * @param url {string}, a URL string.
-     * @param type {string}, the element's tag name.
-     * @return void.
-     */
-    var viewMedia = function(url, type) {
-        var el = document.createElement(type);
-        el.src = url;
-        el.controls = true;
-        el.onerror = function() {
-            url = decodeURIComponent(url.replace(proxy, ''));
-            parent.communicate({linkUrl: url, type: 'text'});
-        };
-        setBody('', true);
-        document.body.appendChild(el);
     };
     /**
      * Prefix all links by '#'.
@@ -69,6 +52,7 @@ function communicate(data) {
     var formify = function() {
         var form, formAction;
         var forms = document.forms;
+        var index = forms.length;
         /**
          * Submit a GET form indirectly.
          * @param ev {object}, a submit event.
@@ -104,7 +88,6 @@ function communicate(data) {
             alert('Form type not supported.');
             ev.preventDefault();
         };
-        var index = forms.length;
         while (index--) {
             form = forms[index];
             if (form.method === 'get' && form.action) {
@@ -113,6 +96,28 @@ function communicate(data) {
                 form.onsubmit = handleForm;
             }
         }
+    };
+    /**
+     * View media elements.
+     * @param url {string}, a URL string.
+     * @param type {string}, the element's tag name.
+     * @return void.
+     */
+    var viewMedia = function(url, type) {
+        var el = document.createElement(type);
+        el.src = url;
+        el.controls = true;
+        el.onload = function() {
+            parent.isLoading = false;
+        };
+        el.onerror = function() {
+            url = decodeURIComponent(url.replace(proxy, ''));
+            parent.communicate({linkUrl: url, type: 'text'});
+        };
+        setBody('', true);
+        document.body.appendChild(el);
+        parent.isLoading = true;
+        parent.changeBorderColor('green', true);
     };
     if (type === 'document') {
         setBody(dataVal, true);

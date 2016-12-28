@@ -37,7 +37,7 @@ function proxify(raw, proxy, baseURL) {
      */
     var fetchStyles = function(src) {
         src = proxUri(src);
-        window.loadResource(src, 'text/css', true);
+        window.loadResource(src, 'text/css');
     };
 
     /**

@@ -60,13 +60,12 @@ function normalizeURL(url, isSilent) {
  * Pass all given data to the viewer.
  * @param type {string}, the type of the data.
  * @param data {string}, the data to pass.
- * @param target {string} optional, an owner page URL.
  * @return void.
  */
-function passData(type, data, target) {
+function passData(type, data) {
     'use strict';
     viewer.contentWindow.communicate(
-        {proxyUrl: proxy, dataType: type, dataVal: data, targetPage: target}
+        {proxyUrl: proxy, dataType: type, dataVal: data}
     );
 }
 
@@ -96,41 +95,42 @@ function navigate(linkUrl) {
 }
 
 /**
+ * Change the viewer's border color.
+ * @param color {string}, a color name.
+ * @param loadingFlag {boolean}, determines loading status.
+ * @return void.
+ */
+function changeBorderColor(color, loadingFlag) {
+    var interval;
+    if (loadingFlag) {
+        interval = setInterval(function() {
+            if (isLoading) {
+                changeBorderColor('red');
+                setTimeout(function () {
+                    if (isLoading) {
+                        changeBorderColor('green');
+                    }
+                }, 400);
+            } else {
+                clearInterval(interval);
+                changeBorderColor('silver');
+            }
+        }, 800);
+    }
+    viewer.style.borderColor = color;
+};
+
+/**
  * Load an external Web resource.
  * @param resourceUrl {string}, the URL of the resource.
  * @param type {string} optional, the type of the resource.
- * @param isSubResource {boolean} optional, determines if it is a subresource.
+ * @param isTldResource {boolean} optional, determines if it is a top-level resource.
  * @return void.
  */
-function loadResource(resourceUrl, type, isSubResource) {
+function loadResource(resourceUrl, type, isTldResource) {
     'use strict';
     var url = proxy + encodeURIComponent(resourceUrl);
     var exts = /(?:\.(?:s?html?|php|(?:j|a)spx?|p(?:y|l)|c(?:gi|ss)|js(?:on)?|txt|cfml?)|:\/\/.+?\/(?:[^.?#]*|[^a-z?#]*))(?:[?#].*)?$/;
-    /**
-     * Change the viewer's border color.
-     * @param color {string}, a color name.
-     * @param loadingFlag {boolean}, determines loading status.
-     * @return void.
-     */
-    var changeBorderColor = function(color, loadingFlag) {
-        var interval;
-        if (loadingFlag) {
-            interval = setInterval(function() {
-                if (isLoading) {
-                    changeBorderColor('red');
-                    setTimeout(function () {
-                        if (isLoading) {
-                            changeBorderColor('green');
-                        }
-                    }, 400);
-                } else {
-                    clearInterval(interval);
-                    changeBorderColor('silver');
-                }
-            }, 800);
-        }
-        viewer.style.borderColor = color;
-    };
     /**
      * Fetch an external resource.
      * @param type {string}, the type of the resource.
@@ -140,7 +140,7 @@ function loadResource(resourceUrl, type, isSubResource) {
         var xhrReq = new XMLHttpRequest();
         xhrReq.responseType = (type === 'resource') ? 'blob' : 'text';
         xhrReq.onerror = function() {
-            if (isLoading && !isSubResource) {
+            if (isLoading && isTldResource) {
                 alert('NetworkError: A network error occurred.');
             }
             setTimeout(function() {
@@ -206,16 +206,19 @@ function loadResource(resourceUrl, type, isSubResource) {
                     file = this.response;
                     if (file.size >= 9000000) {
                         assert = confirm('Too large resource! Proceed anyway?');
-                        if (!assert) { return; }
+                        if (!assert) {
+                            return;
+                        }
                     }
                     reader = new FileReader();
                     reader.readAsDataURL(file);
                     reader.onloadend = function() {
                         passData('resource', reader.result);
                     };
+
                 }
             } else {
-                if (!isSubResource) {
+                if (isTldResource) {
                     alert('HTTPError: ' + this.status + ' ' + this.statusText);
                 }
                 parseResponse();
@@ -239,13 +242,13 @@ function loadResource(resourceUrl, type, isSubResource) {
     } else if (exts.test(resourceUrl)) {
         fetch('text');
     // Perhaps an image?
-    } else if (/\.(?:jpe?g|png|gif|bmp)(?:[?#].*)?$/i.test(resourceUrl)) {
+    } else if (/\.(?:jpe?g|png|gif|svg|bmp|ico)(?:[?#].*)?$/i.test(resourceUrl)) {
         passData('img', url);
     // Maybe some audio file?
-    } else if (/\.(?:mp3|wav)(?:[?#].*)?$/i.test(resourceUrl)) {
+    } else if (/\.(?:mp3|wav|ogg)(?:[?#].*)?$/i.test(resourceUrl)) {
         passData('audio', url);
     // Probably a video?
-    } else if (/\.(?:mp4|webm|ogg)(?:[?#].*)?$/i.test(resourceUrl)) {
+    } else if (/\.(?:mp4|webm|3gp)(?:[?#].*)?$/i.test(resourceUrl)) {
         passData('video', url);
     } else {
         fetch('resource');
@@ -253,7 +256,7 @@ function loadResource(resourceUrl, type, isSubResource) {
 }
 
 /**
- * Send and receive data from other scripts.
+ * Handle sent and received data from other scripts.
  * @param data {object}, a data container object.
  * @return void.
  */
@@ -262,14 +265,16 @@ function communicate(data) {
     var type = data.type;
     var linkUrl = normalizeURL(data.linkUrl);
     if (linkUrl) {
+        // Reset the view.
+        passData('', '');
+        // Terminate any ongoing connections.
         stopLoading();
-        loadResource(linkUrl, type);
+        // Load the new resource.
+        loadResource(linkUrl, type, true);
     } else {
         linkUrl = data.linkUrl;
     }
     navBar.value = linkUrl;
-    // Reset the view.
-    passData('', '');
 }
 
 /**
