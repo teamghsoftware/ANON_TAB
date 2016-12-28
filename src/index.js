@@ -7,7 +7,7 @@ var tabId;
  * @return void.
  */
 function openTab(linkUrl, flag) {
-    chrome.tabs.create({active: true, url: './main.html'}, function(tab) {
+    chrome.tabs.create({active: true, url: 'main.html'}, function(tab) {
         if (flag === 'contextMenu') {
             tabId = tab.id;
         }

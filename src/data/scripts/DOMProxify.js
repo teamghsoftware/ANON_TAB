@@ -21,35 +21,23 @@ function proxify(raw, proxy, baseURL) {
      * @return {string}, a proxified URL string.
      */
     var proxUri = function(uri) {
+        var hostRe = /\w+:\/\/[^\/]+/;
         uri = /^\w+:\/\//.test(uri) ? uri :
               uri.startsWith('//') ? baseURL.match(/\w+:/) + uri :
-              uri.startsWith('/') ? baseURL.match(/\w+:\/\/[^\/]+/) + uri :
-              baseURL.match(/\w+:\/\/[^\/]+/) + '/' + uri;
+              uri.startsWith('/') ? baseURL.match(hostRe) + uri :
+              baseURL.match(hostRe) + '/' + uri;
         uri = new URL(uri);
         return proxy + encodeURIComponent(uri);
     };
 
     /**
-     * Handle any external CSS styles.
-     * @return void.
-     */
-    var addExtStyles = function() {
-        var rawStyles = '<style>' + this.response + '</style>';
-        var cleanStyles = proxify(rawStyles, proxy, baseURL);
-        window.passData('styles', cleanStyles, baseURL);
-    };
-
-    /**
-     * Fetch external CSS files.
+     * Fetch external CSS styles.
      * @param src {string}, a URI string.
      * @return void.
      */
     var fetchStyles = function(src) {
-        var css_xhr = new XMLHttpRequest();
         src = proxUri(src);
-        css_xhr.onload = addExtStyles;
-        css_xhr.open('GET', src);
-        css_xhr.send();
+        window.loadResource(src, 'text/css', true);
     };
 
     /**
@@ -79,7 +67,7 @@ function proxify(raw, proxy, baseURL) {
     };
 
     /**
-     * Take CSS rules and analyze them, proxify URIs via `proxStyles`,
+     * Take CSS rules and analyze them, proxify URIs via `proxStyles()`,
      * then create matching CSS text for later application to the DOM.
      * @param output {array}, a container empty array.
      * @param cssRules {array}, a CSSRuleList object.

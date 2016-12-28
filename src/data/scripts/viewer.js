@@ -119,13 +119,9 @@ function communicate(data) {
         linkify();
         formify();
     } else if (type === 'styles') {
-        target = data.targetPage;
-        _target = docHref;
-        if (target === _target) {
-            styleEl = document.createElement('style');
-            styleEl.innerHTML = dataVal;
-            document.body.appendChild(styleEl);
-        }
+        styleEl = document.createElement('style');
+        styleEl.innerHTML = dataVal;
+        document.body.appendChild(styleEl);
     } else if (type === 'img' ||
                   type === 'audio' ||
                       type === 'video') {

@@ -1,5 +1,5 @@
-var proxy = 'https://feedback.googleusercontent.com/gadgets/proxy?container=fbk&url=';
 var proxyInpt = document.getElementById('proxyInpt');
+var proxyUri = 'https://feedback.googleusercontent.com/gadgets/proxy?container=fbk&url=';
 
 /**
  * Change the boxShadow's color value of `proxyInpt.style`.
@@ -17,7 +17,7 @@ function setBoxShadowColor (color) {
 function saveOptions() {
     var proxy = proxyInpt.value;
     chrome.storage.local.set({
-        proxy: proxy
+        proxy: proxyUri
     });
 }
 
@@ -28,10 +28,10 @@ function saveOptions() {
  */
 function restoreOptions(reset) {
     if (reset === true) {
-        proxyInpt.value = proxy;
+        proxyInpt.value = proxyUri;
     } else {
         chrome.storage.local.get({
-            proxy: proxy
+            proxy: proxyUri
         }, function(items) {
             proxyInpt.value = items.proxy;
         });

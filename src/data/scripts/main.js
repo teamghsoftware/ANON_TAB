@@ -99,12 +99,13 @@ function navigate(linkUrl) {
  * Load an external Web resource.
  * @param resourceUrl {string}, the URL of the resource.
  * @param type {string} optional, the type of the resource.
+ * @param isSubResource {boolean} optional, determines if it is a subresource.
  * @return void.
  */
-function loadResource(resourceUrl, type) {
+function loadResource(resourceUrl, type, isSubResource) {
     'use strict';
     var url = proxy + encodeURIComponent(resourceUrl);
-    var exts = /(?:\.(?:s?html?|php|cgi|txt|(?:j|a)spx?|json|py|pl|cfml?)|\/(?:[^.]*|[^a-z?#]+))(?:[?#].*)?$/i;
+    var exts = /(?:\.(?:s?html?|php|(?:j|a)spx?|p(?:y|l)|c(?:gi|ss)|js(?:on)?|txt|cfml?)|:\/\/.+?\/(?:[^.?#]*|[^a-z?#]*))(?:[?#].*)?$/;
     /**
      * Change the viewer's border color.
      * @param color {string}, a color name.
@@ -139,30 +140,43 @@ function loadResource(resourceUrl, type) {
         var xhrReq = new XMLHttpRequest();
         xhrReq.responseType = (type === 'resource') ? 'blob' : 'text';
         xhrReq.onerror = function() {
-            if (isLoading) {
+            if (isLoading && !isSubResource) {
                 alert('NetworkError: A network error occurred.');
             }
-            isLoading = false;
+            setTimeout(function() {
+                isLoading = false;
+            });
         };
         xhrReq.onload = function() {
-            var file, assert, reader;
-            var responseType = this.getResponseHeader('content-type');
+            var assert, file, reader, responseType;
             /**
              * Parse the `responseText` property of `xhrReq`.
+             * @param type {string} optional, the type of the response.
              * @return void.
              */
-            var parseResponse = function() {
-                if (xhrReq.responseType === 'text') {
-                    var html = proxify(xhrReq.responseText, proxy, resourceUrl);
-                    // Pass all sanitized markup to the viewer.
-                    passData('document', html);
-                    if (/#.+/.test(resourceUrl)) {
-                        // Scroll to a given page anchor.
-                        navigate('#' + resourceUrl.match(/#.+/));
+            var parseResponse = function(type) {
+                var markup;
+                var responseText = xhrReq.responseText;
+                try {
+                    if (type === 'styles') {
+                        responseText = '<style>' + responseText + '</style>';
                     }
-                }
+                    // Proxify all markup.
+                    markup = proxify(responseText, proxy, resourceUrl);
+                    /* Pass the markup to the viewer. */
+                    if (type === 'styles') {
+                        passData('styles', markup, navbar.value);
+                    } else {
+                        passData('document', markup);
+                        if (/#.+/.test(resourceUrl)) {
+                            // Scroll to a given page anchor.
+                            navigate('#' + resourceUrl.match(/#.+/));
+                        }
+                    }
+                } catch (e) {}
             };
             try {
+                responseType = this.getResponseHeader('Content-Type');
                 if (responseType.indexOf(type) !== 0) {
                     responseType = responseType.match(/^\w*/).toString();
                     if (responseType === 'text') {
@@ -186,6 +200,8 @@ function loadResource(resourceUrl, type) {
             if (this.status === 200) {
                 if (type === 'text') {
                     parseResponse();
+                } else if (type === 'text/css') {
+                    parseResponse('styles');
                 } else {
                     file = this.response;
                     if (file.size >= 9000000) {
@@ -199,16 +215,22 @@ function loadResource(resourceUrl, type) {
                     };
                 }
             } else {
-                alert('HTTPError: ' + this.status + ' ' + this.statusText);
+                if (!isSubResource) {
+                    alert('HTTPError: ' + this.status + ' ' + this.statusText);
+                }
                 parseResponse();
             }
-            isLoading = false;
+            setTimeout(function() {
+                isLoading = false;
+            });
         };
         xhrReq.open('GET', url);
-        setTimeout(function() {
-            isLoading = true;
-            changeBorderColor('green', true);
-        });
+        if (!isLoading) {
+            setTimeout(function() {
+                isLoading = true;
+                changeBorderColor('green', true);
+            });
+        }
         xhrReq.send();
     };
     if (typeof type === 'string') {
@@ -267,6 +289,6 @@ function initNav(ev) {
     }
 }
 
-// Register event listeners to handle gesture-based navigations.
+/* Register event listeners to handle user-initiated navigations. */
 document.getElementById('navform').onsubmit = initNav;
 chrome.runtime.onMessage.addListener(initNav);
